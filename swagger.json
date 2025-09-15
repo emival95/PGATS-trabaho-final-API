@@ -1,0 +1,124 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API de Transferências",
+    "version": "1.0.0",
+    "description": "API para login, registro, consulta de usuários e transferências."
+  },
+  "servers": [
+    { "url": "http://localhost:3000" }
+  ],
+  "paths": {
+    "/users/register": {
+      "post": {
+        "summary": "Registrar novo usuário",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" },
+                  "favorecidos": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                },
+                "required": ["username", "password"]
+              },
+              "example": {
+                "username": "joao",
+                "password": "1234",
+                "favorecidos": ["maria"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuário criado"
+          },
+          "400": {
+            "description": "Erro de validação"
+          }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "summary": "Login de usuário",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["username", "password"]
+              },
+              "example": {
+                "username": "joao",
+                "password": "1234"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login realizado" },
+          "401": { "description": "Credenciais inválidas" }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "Listar usuários",
+        "responses": {
+          "200": {
+            "description": "Lista de usuários"
+          }
+        }
+      }
+    },
+    "/transfers": {
+      "post": {
+        "summary": "Realizar transferência",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "from": { "type": "string" },
+                  "to": { "type": "string" },
+                  "value": { "type": "number" }
+                },
+                "required": ["from", "to", "value"]
+              },
+              "example": {
+                "from": "joao",
+                "to": "maria",
+                "value": 1000
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Transferência realizada" },
+          "400": { "description": "Erro de validação" }
+        }
+      },
+      "get": {
+        "summary": "Listar transferências",
+        "responses": {
+          "200": { "description": "Lista de transferências" }
+        }
+      }
+    }
+  }
+}
