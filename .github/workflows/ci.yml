@@ -33,6 +33,11 @@ jobs:
 
     - name: Executar testes de API
       run: npm run test-rest-external 
-      
+    
+    - name: subir a Api GraphQL
+      run: npm run start-graphql &
+
+    - name: Executar testes de API GraphQL
+      run: sleep 5 && npm run test-graphql-external  
     
     
