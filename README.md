@@ -80,11 +80,89 @@ mutation {
 - `swagger.json` - Documentação da API
 
 ## Endpoints Principais
-- `POST /users/register` - Registro de usuário
-- `POST /users/login` - Login
-- `GET /users` - Listar usuários
-- `POST /transfers` - Realizar transferência
-- `GET /transfers` - Listar transferências
+
+## Onde cada conceito do K6 foi aplicado no código
+
+- **Thresholds**  
+  Definido no objeto `options` do teste K6, por exemplo:  
+  `thresholds: { http_req_duration: ['p(95)<2000'] }`  
+  Arquivo: `test/k6/tranferencia.test.js`
+
+- **Checks**  
+  Utilizado para validar respostas das requisições, por exemplo:  
+  `check(res, { 'register status 201 ou 400': (r) => r.status === 201 || r.status === 400 })`  
+  Arquivo: `test/k6/tranferencia.test.js`
+
+- **Helpers**  
+  Funções auxiliares importadas de outros arquivos, como:  
+  `import { getBaseUrl } from './helpers/getBaseUrl.js';`  
+  `import { login } from './helpers/login.js';`  
+  Arquivo: `test/k6/tranferencia.test.js`  
+  Helpers estão em: `test/k6/helpers/`
+
+- **Trends**  
+  Métricas customizadas para análise de performance, exemplo:  
+  `const transferTrend = new Trend('transfer_post_duration');`  
+  `transferTrend.add(res.timings.duration);`  
+  Arquivo: `test/k6/tranferencia.test.js`
+
+- **Faker**  
+  Geração de dados aleatórios para os testes:  
+  `import faker from "k6/x/faker"`  
+  `username = faker.person.firstName();`  
+  Arquivo: `test/k6/tranferencia.test.js`
+
+- **Variável de Ambiente**  
+  Uso de variáveis como `BASE_URL` para configurar o endpoint:  
+  `getBaseUrl()` lê a variável de ambiente `BASE_URL`  
+  Arquivo: `test/k6/helpers/getBaseUrl.js`  
+  Exemplo de execução:  
+  `k6 run --env BASE_URL=http://localhost:3000 test/k6/login.test.js`
+
+- **Stages**  
+  Configuração de ramp-up e ramp-down de usuários virtuais:  
+  ```js
+  stages: [
+    { duration: '5s', target: 5 },
+    { duration: '10s', target: 10 },
+    { duration: '5s', target: 0 },
+  ]
+  ```
+  Arquivo: `test/k6/tranferencia.test.js`
+
+- **Reaproveitamento de Resposta**  
+  O token de autenticação obtido no login é reutilizado em requisições subsequentes:  
+  ```js
+  token = login(username, password);
+  ...
+  Authorization: `Bearer ${token}`
+  ```
+  Arquivo: `test/k6/tranferencia.test.js`
+
+- **Uso de Token de Autenticação**  
+  O token JWT é enviado no header das requisições protegidas:  
+  ```js
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  }
+  ```
+  Arquivo: `test/k6/tranferencia.test.js`
+
+- **Data-Driven Testing**  
+  Utilização de dados externos para alimentar os testes, por exemplo:  
+  Arquivo de dados: `test/k6/data/login.test.data.json`  
+  (Exemplo de uso pode ser visto em outros testes K6 do projeto)
+
+- **Groups**  
+  Organização dos testes em blocos lógicos:  
+  ```js
+  group('Registrar favorecido', function () { ... });
+  group('Registrar usuário', function () { ... });
+  group('Login', function () { ... });
+  group('Transferência', function () { ... });
+  ```
+  Arquivo: `test/k6/tranferencia.test.js`
 
 ## Observações
 - O banco de dados é em memória (os dados são perdidos ao reiniciar).
